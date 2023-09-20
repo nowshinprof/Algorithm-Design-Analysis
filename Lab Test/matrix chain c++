@@ -1,0 +1,53 @@
+#include <iostream>
+#include <vector>
+#include <climits>
+
+using namespace std;
+
+// Function to find the minimum number of scalar multiplications and optimal parenthesization for three matrices
+void matrixChainOrder(const vector<int>& dimensions, int i, int j, vector<vector<int>>& M, vector<vector<int>>& S) {
+    M[i][j] = 0; // Base case: no multiplications needed for a single matrix
+
+    // Calculate the number of multiplications for three matrices
+    for (int k = i; k < j; ++k) {
+        int cost = M[i][k] + M[k + 1][j] + dimensions[i] * dimensions[k + 1] * dimensions[j + 1];
+        if (cost < M[i][j]) {
+            M[i][j] = cost;
+            S[i][j] = k; // Record the split point
+        }
+    }
+}
+
+// Helper function to print the optimal parenthesization for three matrices
+void printOptimalParenthesization(vector<vector<int>>& S, int i, int j) {
+    if (i == j) {
+        cout << "A" << i + 1;
+    } else {
+        cout << "(";
+        printOptimalParenthesization(S, i, S[i][j]);
+        printOptimalParenthesization(S, S[i][j] + 1, j);
+        cout << ")";
+    }
+}
+
+int main() {
+    vector<int> dimensions = {10, 30, 5, 60, 15, 10}; // Example dimensions of matrices
+    int n = dimensions.size() - 1; // Number of matrices in the sequence
+
+    // Create memoization tables
+    vector<vector<int>> M(n, vector<int>(n, INT_MAX)); // Memoization table for minimum multiplications
+    vector<vector<int>> S(n, vector<int>(n, 0)); // Splitting point table
+
+    // Call the matrixChainOrder function to calculate the minimum number of multiplications and the optimal parenthesization
+    matrixChainOrder(dimensions, 0, n - 2, M, S);
+
+    // Print the minimum number of scalar multiplications
+    cout << "Minimum number of scalar multiplications: " << M[0][n - 2] << endl;
+
+    // Print the optimal parenthesization
+    cout << "Optimal parenthesization: ";
+    printOptimalParenthesization(S, 0, n - 2);
+    cout << endl;
+
+    return 0;
+}
